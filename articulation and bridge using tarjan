@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+using namespace std ;
+
+void tarjandfs(int i, vector<int > adj[], int disc[], int low[],bool vis[], set<int > *art, set<pair<int,int>> *bg, int parent[]){
+	static int time= 0;
+	int child =0;
+	disc[i] = low[i] = ++time ;
+    vis[i]= true;
+	for(auto it = adj[i].begin(); it!= adj[i].end(); it++){
+		int v = *it;  // child
+		child++;
+		parent[v]=i;
+		if(vis[v]==false){
+			tarjandfs(v,adj,disc,low,vis,art,bg,parent);
+
+			low[i]=min(low[i], low[v]);
+
+			if(parent[i]== 0 && child<1){
+				art->insert(i);
+				//cout<<"entering  parent\n";
+			}
+		   if(parent[i]!= 0 && low[v] >=disc[i]){
+			   art->insert(i);
+			  // cout<<"in articulation condition\n";
+		   }
+		   if(low[v] > disc[i] ){
+			   if(i < v){
+				    bg->insert({i,v});
+			   }
+			   else { bg->insert({v,i}); }
+			  //cout<<"in bridge condition\n";
+		   }
+
+		}
+
+		else if(v != parent[i] ){  // notice this be careful with it .
+			low[i]= min(low[i], disc[v]);
+		}
+		
+	}
+
+
+}
+
+void art(vector<int > adj[] , int n){
+	int disc[n+1],low[n+1],parent[n+1];
+	bool vis[n+1];
+	set < int > art;
+	set < pair<int ,int > > bg;
+
+	for(int i =0 ; i<=n ; i++){
+		vis[i]=false;
+		disc[i]=-1;
+		low[i]=-1;
+		parent[i]= 0 ;
+	}
+	for(int i = 0 ; i<n ; i++){
+		if(vis[i]==false){
+			tarjandfs(i,adj,disc,low,vis,&art,&bg,parent);
+		}
+	}
+	cout<<art.size();
+	cout<<endl;
+	for(auto it = art.begin(); it!= art.end();  it++ ){
+		cout<<(*it)<<" ";
+	}
+	cout<<endl;
+	cout<<bg.size()<<endl;
+	for(auto it = bg.begin(); it!= bg.end();  it++ ){
+		cout<<(*it).first<<" "<<(*it).second<<endl;
+	}
+}
+
+int main(){
+	int n,m;
+	cin>>n>>m;
+	vector<int > adj[n+1];
+	while(m--){
+		int p,q;
+		cin>>p>>q;
+		adj[p].push_back(q);
+		adj[q].push_back(p);
+	}
+	art(adj,n);
+}
